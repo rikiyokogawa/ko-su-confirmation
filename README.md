@@ -1,4 +1,4 @@
 # 工数確認用のアプリです
 
-`npm install`の後に `npm start`で起動ができます
+`yarn install`の後に `yarn start`で起動ができます
 
