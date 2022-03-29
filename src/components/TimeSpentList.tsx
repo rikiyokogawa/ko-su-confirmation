@@ -24,6 +24,12 @@ const useStyles = makeStyles((theme) => ({
         width: '50%',
         margin: '10px',
     },
+    csvTable: {
+        textAlign: "center",
+        padding: theme.spacing(2),
+        width: "75%",
+        margin: '10px',
+    },
     paper: {
         padding: theme.spacing(2),
         display: 'flex',
@@ -47,7 +53,6 @@ const useStyles = makeStyles((theme) => ({
 function createData(name: string, initEstimate: number, spent: number, result: number) {
     return {name, initEstimate, spent, result};
 }
-
 
 function createResultData(businessDay: number, hourLate: number, manDayLate: number) {
     return {businessDay, hourLate, manDayLate};
@@ -119,6 +124,7 @@ const TimeSpentList = () => {
     const [totalSpent, setTotalSpent] = React.useState(0);
     const [totalResult, setTotalResult] = React.useState(0);
     const [businessDayConversion, setBusinessDayConversion] = React.useState(320);
+    const [csvList, setCsvList] = React.useState([]);
 
     useEffect(() => {
         setBusinessDayConversion(((320 / Number(month)) * Number(day)))
@@ -179,6 +185,7 @@ const TimeSpentList = () => {
         setTotalSpent(Number((openSpent_tmp + solvedSpent_tmp + ipSpent_tmp + closeSpent_tmp + susSpent_tmp).toFixed(2)));
         setTotalResult(Number((solvedInit_tmp + (ipInit_tmp / 2) + closeInit_tmp + susInit_tmp).toFixed(2)));
 
+        setCsvList(dataList);
     };
 
     const estimateRows = [
@@ -205,86 +212,120 @@ const TimeSpentList = () => {
     }
 
     return (
-        <Paper className={classes.paper}>
-            <TableContainer component={Paper} className={classes.timeSpentTable}>
-                <Table aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell style={{fontWeight: "bold"}} width="25%">ステータス</TableCell>
-                            <TableCell style={{fontWeight: "bold"}} width="25%" align="right">合計/初期見積もり</TableCell>
-                            <TableCell style={{fontWeight: "bold"}} width="25%" align="right">合計/消費時間</TableCell>
-                            <TableCell style={{fontWeight: "bold"}} width="25%" align="right">集計結果</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {estimateRows.map((row) => (
-                            <TableRow key={row.name}>
-                                <TableCell component="th" scope="row">
-                                    {row.name}
-                                </TableCell>
-                                <TableCell align="right">{row.initEstimate}</TableCell>
-                                <TableCell align="right">{row.spent}</TableCell>
-                                <TableCell align="right">{row.result}</TableCell>
+        <div>
+            <Paper className={classes.paper}>
+                <TableContainer component={Paper} className={classes.timeSpentTable}>
+                    <Table aria-label="simple table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell style={{fontWeight: "bold"}} width="25%">ステータス</TableCell>
+                                <TableCell style={{fontWeight: "bold"}} width="25%" align="right">合計/初期見積もり</TableCell>
+                                <TableCell style={{fontWeight: "bold"}} width="25%" align="right">合計/消費時間</TableCell>
+                                <TableCell style={{fontWeight: "bold"}} width="25%" align="right">集計結果</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-                <Table aria-label="simple table">
-                    <TableHead className={classes.tableHead}>
-                        <TableRow>
-                            <TableCell style={{fontWeight: "bold"}} width="25%"> </TableCell>
-                            <TableCell style={{fontWeight: "bold"}} width="25%" align="right">初期見積もり</TableCell>
-                            <TableCell style={{fontWeight: "bold"}} width="25%" align="right"> </TableCell>
-                            <TableCell style={{fontWeight: "bold"}} width="25%" align="right">消化工数</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {to320hRows.map((row) => (
-                            <TableRow key={row.label}>
-                                <TableCell component="th" scope="row">
-                                    {row.label}
-                                </TableCell>
-                                <TableCell align="right">{row.to320hInit.toFixed(2)}</TableCell>
-                                <TableCell align="right"> </TableCell>
-                                <TableCell align="right">{row.to320hResult.toFixed(2)}</TableCell>
+                        </TableHead>
+                        <TableBody>
+                            {estimateRows.map((row) => (
+                                <TableRow key={row.name}>
+                                    <TableCell component="th" scope="row">
+                                        {row.name}
+                                    </TableCell>
+                                    <TableCell align="right">{row.initEstimate}</TableCell>
+                                    <TableCell align="right">{row.spent}</TableCell>
+                                    <TableCell align="right">{row.result}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                    <Table aria-label="simple table">
+                        <TableHead className={classes.tableHead}>
+                            <TableRow>
+                                <TableCell style={{fontWeight: "bold"}} width="25%"> </TableCell>
+                                <TableCell style={{fontWeight: "bold"}} width="25%" align="right">初期見積もり</TableCell>
+                                <TableCell style={{fontWeight: "bold"}} width="25%" align="right"> </TableCell>
+                                <TableCell style={{fontWeight: "bold"}} width="25%" align="right">消化工数</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <TableContainer component={Paper} className={classes.manDayTable}>
-                <Table aria-label="simple table">
-                    <TableHead className={classes.tableHead}>
-                        <TableRow>
-                            <TableCell style={{fontWeight: "bold"}} width="20%">営業日換算</TableCell>
-                            <TableCell style={{fontWeight: "bold"}} width="30%" align="right">何時間遅れている</TableCell>
-                            <TableCell style={{fontWeight: "bold"}} width="30%" align="right">何人日遅れている</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {resultRows.map((row) => (
-                            <TableRow key={row.businessDay}>
-                                <TableCell component="th" scope="row">
-                                    {Number.isNaN(row.businessDay) ? 0 : row.businessDay.toFixed(2)}
-                                </TableCell>
-                                <TableCell align="right">{Number.isNaN(row.hourLate) ? 0 : row.hourLate.toFixed(2)}</TableCell>
-                                <TableCell align="right">{Number.isNaN(row.manDayLate) ? 0 : row.manDayLate.toFixed(2)}</TableCell>
+                        </TableHead>
+                        <TableBody>
+                            {to320hRows.map((row) => (
+                                <TableRow key={row.label}>
+                                    <TableCell component="th" scope="row">
+                                        {row.label}
+                                    </TableCell>
+                                    <TableCell align="right">{row.to320hInit.toFixed(2)}</TableCell>
+                                    <TableCell align="right"> </TableCell>
+                                    <TableCell align="right">{row.to320hResult.toFixed(2)}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <TableContainer component={Paper} className={classes.manDayTable}>
+                    <Table aria-label="simple table">
+                        <TableHead className={classes.tableHead}>
+                            <TableRow>
+                                <TableCell style={{fontWeight: "bold"}} width="20%">営業日換算</TableCell>
+                                <TableCell style={{fontWeight: "bold"}} width="30%" align="right">何時間遅れている</TableCell>
+                                <TableCell style={{fontWeight: "bold"}} width="30%" align="right">何人日遅れている</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHead>
+                        <TableBody>
+                            {resultRows.map((row) => (
+                                <TableRow key={row.businessDay}>
+                                    <TableCell component="th" scope="row">
+                                        {Number.isNaN(row.businessDay) ? 0 : row.businessDay.toFixed(2)}
+                                    </TableCell>
+                                    <TableCell align="right">{Number.isNaN(row.hourLate) ? 0 : row.hourLate.toFixed(2)}</TableCell>
+                                    <TableCell align="right">{Number.isNaN(row.manDayLate) ? 0 : row.manDayLate.toFixed(2)}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
 
-                <div className={classes.text}>
-                    <TextField id="month" name="month" label="今月の営業日数を入力" variant="outlined" onChange={handleChange} className={classes.text}/>
-                    <TextField id="day" name="day" label="今日の営業日数を入力" variant="outlined" onChange={handleChange} className={classes.text}/>
-                </div>
-                <div className={classes.button}>
-                    <CSVReader
-                        onFileLoaded={handleClick}
-                    />
-                </div>
-            </TableContainer>
-        </Paper>
+                    <div className={classes.text}>
+                        <TextField id="month" name="month" label="今月の営業日数を入力" variant="outlined" onChange={handleChange} className={classes.text}/>
+                        <TextField id="day" name="day" label="今日の営業日数を入力" variant="outlined" onChange={handleChange} className={classes.text}/>
+                    </div>
+                    <div className={classes.button}>
+                        <CSVReader
+                            onFileLoaded={handleClick}
+                        />
+                    </div>
+                </TableContainer>
+            </Paper>
+            <Paper className={classes.paper}>
+                <TableContainer component={Paper} className={classes.csvTable}>
+                    <Table aria-label="simple table">
+                        {csvList.map((row, index) =>
+                            index === 0 ?
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell style={{fontWeight: "bold"}} width="15%">{row[0]}</TableCell>
+                                    <TableCell style={{fontWeight: "bold"}} width="25%">{row[1]}</TableCell>
+                                    <TableCell style={{fontWeight: "bold"}} width="10%">{row[2]}</TableCell>
+                                    <TableCell style={{fontWeight: "bold"}} width="12%">{row[3]}</TableCell>
+                                    <TableCell style={{fontWeight: "bold"}} width="12%">{row[4]}</TableCell>
+                                    <TableCell style={{fontWeight: "bold"}} width="12%">{row[5]}</TableCell>
+                                    <TableCell style={{fontWeight: "bold"}} width="14%">{row[6]}</TableCell>
+                                </TableRow>
+                            </TableHead> :
+                            <TableBody>
+                                <TableRow key={row[0]}>
+                                    <TableCell>{row[0]}</TableCell>
+                                    <TableCell>{row[1]}</TableCell>
+                                    <TableCell>{row[2]}</TableCell>
+                                    <TableCell>{row[3]}</TableCell>
+                                    <TableCell>{row[4]}</TableCell>
+                                    <TableCell>{row[5]}</TableCell>
+                                    <TableCell>{row[6]}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        )}
+                    </Table>
+                </TableContainer>
+            </Paper>
+        </div>
+
 
 
     );
